@@ -1,20 +1,23 @@
 {
-  "name": "@nexusflow/worker",
+  "name": "@nexusflow/config",
   "version": "0.0.0",
   "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "dev": "nest start --path tsconfig.json --watch",
     "lint": "eslint src",
-    "start": "node dist/main.js",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",
-    "@nestjs/core": "^11.0.0",
-    "@nexusflow/config": "workspace:*",
-    "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2"
+    "zod": "^4.0.0"
   },
   "devDependencies": {
     "@nexusflow/tsconfig": "workspace:*"
