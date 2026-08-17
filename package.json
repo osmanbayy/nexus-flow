@@ -1,0 +1,29 @@
+{
+  "name": "nexusflow",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Multi-warehouse commerce and logistics orchestration platform",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@10.14.0",
+  "engines": {
+    "node": ">=22.17.0",
+    "pnpm": ">=10.14.0"
+  },
+  "scripts": {
+    "build": "pnpm -r --if-present build",
+    "dev": "pnpm -r --parallel --if-present dev",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "test": "pnpm -r --if-present test",
+    "typecheck": "pnpm -r --if-present typecheck"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.0",
+    "@nexusflow/eslint-config": "workspace:*",
+    "@types/node": "^22.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.9.0"
+  }
+}
