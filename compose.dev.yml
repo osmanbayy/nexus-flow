@@ -3,26 +3,58 @@ name: nexusflow-dev
 services:
   postgres:
     image: postgres:18.3-alpine
+    restart: unless-stopped
+    stop_grace_period: 30s
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-nexusflow}
       POSTGRES_USER: ${POSTGRES_USER:-nexusflow}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
     ports:
       - '127.0.0.1:${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    networks:
+      - nexusflow
 
   redis:
     image: redis:8.8.1-alpine
+    restart: unless-stopped
+    stop_grace_period: 10s
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD must be set}
     command:
       - redis-server
+      - --appendonly
+      - 'yes'
       - --requirepass
       - ${REDIS_PASSWORD:?REDIS_PASSWORD must be set}
     ports:
       - '127.0.0.1:${REDIS_PORT:-6379}:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli ping | grep PONG
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    networks:
+      - nexusflow
 
   rabbitmq:
     image: rabbitmq:4.3.3-management-alpine
+    restart: unless-stopped
+    stop_grace_period: 30s
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-nexusflow}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?RABBITMQ_PASSWORD must be set}
@@ -30,3 +62,30 @@ services:
     ports:
       - '127.0.0.1:${RABBITMQ_AMQP_PORT:-5672}:5672'
       - '127.0.0.1:${RABBITMQ_MANAGEMENT_PORT:-15672}:15672'
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test:
+        - CMD
+        - rabbitmq-diagnostics
+        - -q
+        - ping
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - nexusflow
+
+volumes:
+  postgres_data:
+    name: nexusflow-dev-postgres-data
+  redis_data:
+    name: nexusflow-dev-redis-data
+  rabbitmq_data:
+    name: nexusflow-dev-rabbitmq-data
+
+networks:
+  nexusflow:
+    name: nexusflow-dev-network
+    driver: bridge
